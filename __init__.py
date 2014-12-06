@@ -55,7 +55,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.move_ip(vx,vy)
     def update(self,superficie,vx,vy,t):
         
-        
+
          #Si choca
         
         if self.choco==True:
@@ -88,22 +88,49 @@ def colision(player,recs):
         if player.rect.colliderect(rec):
             return True
     return False
-            
+
+class Cursor(pygame.Rect):
+    def __init__(self):
+        pygame.Rect.__init__(self,0,0,1,1)
+    def update(self):
+        self.left,self.top=pygame.mouse.get_pos()
+        
+class Boton(pygame.sprite.Sprite):
+    def __init__(self,imagen1,imagen2,x=200,y=200):
+        self.imagen_normal=imagen1
+        self.imagen_seleccion=imagen2
+        self.imagen_actual=self.imagen_normal
+        self.rect=self.imagen_actual.get_rect()
+        self.rect.left,self.rect.top=(x,y)
+    def update(self,pantalla,cursor):
+        if cursor.colliderect(self.rect):
+            self.imagen_actual=self.imagen_seleccion
+        else: self.imagen_actual=self.imagen_normal
+        
+        pantalla.blit(self.imagen_actual,self.rect)
+        
 def main():
     import pygame
     
     pygame.init()
     pantalla=pygame.display.set_mode((640,480))
-    salir=False
-    reloj1= pygame.time.Clock()
     
+    reloj1= pygame.time.Clock()
+    reloj2= pygame.time.Clock()
     #Instancias de objetos:
     recs1=Recs(10)
     player1=Player()
+    cursor1=Cursor()
     
     #Fondo de pantalla
     imagenfondo=pygame.image.load("Juegopython/Sprites/fondo3.jpg").convert_alpha()
     
+    imagenBoton1=pygame.image.load("Juegopython/Sprites/PNG/start1.PNG").convert_alpha()
+    imagenBoton2=pygame.image.load("Juegopython/Sprites/PNG/start2.PNG").convert_alpha()
+    imagenBoton3=pygame.image.load("Juegopython/Sprites/PNG/exit1.PNG").convert_alpha()
+    imagenBoton4=pygame.image.load("Juegopython/Sprites/PNG/exit2.PNG").convert_alpha()
+    boton1=Boton(imagenBoton1,imagenBoton2,260,100)
+    boton2=Boton(imagenBoton3,imagenBoton4,260,200)
     #Sonidos
     sonido1=pygame.mixer.Sound("juegopython\Sonidos\die1.wav")
     
@@ -116,12 +143,39 @@ def main():
     velocidad=15
     leftsigueapretada,rightsigueapretada,upsigueapretada,downsigueapretada=False,False,False,False
     t=0
+    menuPrincipal=True
+    salirMenuPrincipal=False
+    salirJuego=False
     #------------------------------------------------------------------------------------------
     
-    while salir!=True:#LOOP PRINCIPAL
+    #---------------MENU PRINCIPAL---------------
+    if menuPrincipal==True:
+        while menuPrincipal==True and salirMenuPrincipal==False:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    salirMenuPrincipal=True
+                    salirJuego=True 
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if cursor1.colliderect(boton1.rect):
+                        menuPrincipal=False
+                    if cursor1.colliderect(boton2.rect):
+                        menuPrincipal=False
+                        salirMenuPrincipal=True
+                        salirJuego=True
+            pantalla.fill((0,0,0))
+            cursor1.update()
+            boton1.update(pantalla,cursor1)
+            boton2.update(pantalla,cursor1)
+            pygame.display.update()
+            reloj2.tick(20)
+        #pygame.quit()
+    #pygame.init()
+    
+    #---------------JUEGO EN SI---------------
+    while salirJuego!=True | salirMenuPrincipal!=False:#LOOP PRINCIPAL
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                salir=True 
+                salirJuego=True 
             if colisiono==False:        
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
@@ -155,6 +209,11 @@ def main():
                         else:vy=0                    
             
         reloj1.tick(20) #Cuento el tiempo a si se mueve el tipo
+        
+        pantalla.blit(imagenfondo,(0,0))
+        
+        
+        
         t+=1
         if t>1:
             t=0
@@ -168,7 +227,7 @@ def main():
         
        
         recs1.mover()
-        pantalla.blit(imagenfondo,(0,0))
+        
         recs1.pintar(pantalla)
        
         player1.update(pantalla,vx,vy,t)
