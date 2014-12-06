@@ -103,10 +103,10 @@ def main():
     
     recs1=Recs(10)
     player1=Player()
-    imagenfondo=pygame.image.load("C:/Users/userpc/Desktop/Juegopython/Sprites/fondo3.jpg").convert_alpha()
+    imagenfondo=pygame.image.load("Juegopython/Sprites/fondo3.jpg").convert_alpha()
     
     
-    sonido1=pygame.mixer.Sound("C:\Users\userpc\desktop\juegopython\Sonidos\pounw.wav")
+    sonido1=pygame.mixer.Sound("juegopython\Sonidos\die1.wav")
     
     
     
@@ -164,7 +164,7 @@ def main():
             colisiono=True
             vx=0
             vy=0
-            #sonido1.play()
+            sonido1.play()
         
        
         recs1.mover()
