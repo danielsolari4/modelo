@@ -32,8 +32,7 @@ class Recs(object):
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         
-        #Si choca
-        
+       
         
         #MOvimiento normal
         
@@ -55,6 +54,9 @@ class Player(pygame.sprite.Sprite):
     def mover(self,vx,vy):
         self.rect.move_ip(vx,vy)
     def update(self,superficie,vx,vy,t):
+        
+        
+         #Si choca
         
         if self.choco==True:
             self.imagenes=[self.imagenexplosion]
@@ -80,13 +82,7 @@ class Player(pygame.sprite.Sprite):
         if self.estamoviendo==False:
             self.imagenactual=0
             self.imagen=self.imagenes[0]
-        
-    
-       
-    
-       
-    
-      
+              
 def colision(player,recs):
     for rec in recs.lista:
         if player.rect.colliderect(rec):
@@ -101,22 +97,26 @@ def main():
     salir=False
     reloj1= pygame.time.Clock()
     
+    #Instancias de objetos:
     recs1=Recs(10)
     player1=Player()
+    
+    #Fondo de pantalla
     imagenfondo=pygame.image.load("Juegopython/Sprites/fondo3.jpg").convert_alpha()
     
-    
+    #Sonidos
     sonido1=pygame.mixer.Sound("juegopython\Sonidos\die1.wav")
     
     
     
     #variables aux
+    #------------------------------------------------------------------------------------------
     colisiono=False
     vx,vy=0,0
     velocidad=15
     leftsigueapretada,rightsigueapretada,upsigueapretada,downsigueapretada=False,False,False,False
     t=0
-    
+    #------------------------------------------------------------------------------------------
     
     while salir!=True:#LOOP PRINCIPAL
         for event in pygame.event.get():
