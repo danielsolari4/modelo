@@ -1,24 +1,37 @@
 import pygame
 import random
+import sys
+
+
+WIDTH = 800    
+HEIGHT = 480
+fondoPrincipal = pygame.image.load("Juegopython/Sprites/FondoMenu.jpg")
+fondoJuego = pygame.image.load("Juegopython/Sprites/FondoJuego.jpg")
+
+#Colores
+Blanco = (255,255,255)
+Rojo = (250,0,0)
+Azul = (70,70,190)
+Amarillo = (255,255,45)
 
 
 class Recs(object):
     def __init__(self,numeroinicial):
         self.lista=[]
         for x in range(numeroinicial):
-            #Crear un rec random
-            leftrandom=random.randrange(2,560)
-            toprandom=random.randrange(-580,-10)
+            #Creamos los rectangulos en random
+            leftrandom=random.randrange(2,770)
+            toprandom=random.randrange(-440,-10)
             width=random.randrange(10,30)
             height=random.randrange(15,30)
             self.lista.append(pygame.Rect(leftrandom,toprandom,width,height))
     def reagregar(self):
         for x in range(len(self.lista)):
             if self.lista[x].top>482:
-                leftrandom=random.randrange(2,560)
-                toprandom=random.randrange(-580,-10)
-                width=random.randrange(10,30)
-                height=random.randrange(15,30)
+                leftrandom=random.randrange(2,770)
+                toprandom=random.randrange(-440,-10)
+                width=random.randrange(10,20)
+                height=random.randrange(10,25)
                 self.lista[x]=(pygame.Rect(leftrandom,toprandom,width,height))
     def agregarotro(self):
         pass
@@ -26,16 +39,14 @@ class Recs(object):
         for rectangulo in self.lista:
             rectangulo.move_ip(0,5)
     def pintar(self,superficie):
+        
         for rectangulo in self.lista:
-            pygame.draw.rect(superficie,(200,0,0),rectangulo)
-
+            pygame.draw.rect(superficie,(250,0,0),rectangulo)
+            
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        
+    def __init__(self):     
        
-        
-        #MOvimiento normal
-        
+        #Movimiento normal
         self.imagenexplosion=pygame.image.load("Juegopython/Sprites/PNG/Sprite6.PNG").convert_alpha()
         self.imagen1=pygame.image.load("Juegopython/Sprites/PNG/Sprite3.PNG").convert_alpha()
         self.imagen2=pygame.image.load("Juegopython/Sprites/PNG/Sprite4.PNG").convert_alpha()
@@ -43,21 +54,22 @@ class Player(pygame.sprite.Sprite):
         self.imagenactual=0
         self.imagen=self.imagenes[self.imagenactual]
         self.rect=self.imagen.get_rect()
-        self.rect.top,self.rect.left=280,0
+        self.rect.top,self.rect.left=280,100
+        
         self.rect.height=100  #Altura
-        self.rect.width=100   #Ancho
+        self.rect.width=80   #Ancho
         #self.rect.left-=self.rect.width/2
         #self.rect.top-=self.rect.height/2
         self.estamoviendo=False
         self.choco=False
         
     def mover(self,vx,vy):
+        
         self.rect.move_ip(vx,vy)
+        
     def update(self,superficie,vx,vy,t):
         
-
-         #Si choca
-        
+        #Si choca
         if self.choco==True:
             self.imagenes=[self.imagenexplosion]
             self.imagen=self.imagenes[0]
@@ -109,22 +121,25 @@ class Boton(pygame.sprite.Sprite):
         
         pantalla.blit(self.imagen_actual,self.rect)
         
+        
+        
+        
+        
 def main():
     import pygame
     
     pygame.init()
-    pantalla=pygame.display.set_mode((640,480))
-    
+    pantalla=pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.mixer.music.load("Juegopython/Sonidos/SonidoFondo.mp3")
+    pygame.mixer.music.play(2) 
     reloj1= pygame.time.Clock()
     reloj2= pygame.time.Clock()
     #Instancias de objetos:
     recs1=Recs(10)
     player1=Player()
     cursor1=Cursor()
-    
     #Fondo de pantalla
     imagenfondo=pygame.image.load("Juegopython/Sprites/fondo3.jpg").convert_alpha()
-    
     imagenBoton1=pygame.image.load("Juegopython/Sprites/PNG/start1.PNG").convert_alpha()
     imagenBoton2=pygame.image.load("Juegopython/Sprites/PNG/start2.PNG").convert_alpha()
     imagenBoton3=pygame.image.load("Juegopython/Sprites/PNG/exit1.PNG").convert_alpha()
@@ -133,9 +148,9 @@ def main():
     boton2=Boton(imagenBoton3,imagenBoton4,260,200)
     #Sonidos
     sonido1=pygame.mixer.Sound("juegopython\Sonidos\die1.wav")
-    
-    
-    
+    SegundosInt = 0
+    flagCronometro = False
+    Fuente1 = pygame.font.SysFont("Arial", 20, True, False)
     #variables aux
     #------------------------------------------------------------------------------------------
     colisiono=False
@@ -143,12 +158,20 @@ def main():
     velocidad=15
     leftsigueapretada,rightsigueapretada,upsigueapretada,downsigueapretada=False,False,False,False
     t=0
+    tiempoReal=0
     menuPrincipal=True
     salirMenuPrincipal=False
     salirJuego=False
+    contadorEmpiza=False
     #------------------------------------------------------------------------------------------
     
+    r1Paredizquierda=pygame.Rect(1,1,2,480) #x y ancho alto
+    r1Paredderecha=pygame.Rect(799,1,2,799) 
+    r1ParedPiso=pygame.Rect(1,479,799,2) 
+    r1ParedTecho=pygame.Rect(1,1,799,2) 
+    
     #---------------MENU PRINCIPAL---------------
+    
     if menuPrincipal==True:
         while menuPrincipal==True and salirMenuPrincipal==False:
             for event in pygame.event.get():
@@ -158,25 +181,33 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if cursor1.colliderect(boton1.rect):
                         menuPrincipal=False
+                        contadorEmpiza=True
+                        #score_start = pygame.time.get_ticks()/1000
                     if cursor1.colliderect(boton2.rect):
                         menuPrincipal=False
                         salirMenuPrincipal=True
                         salirJuego=True
-            pantalla.fill((0,0,0))
+            pantalla.blit(fondoPrincipal,(0,0))
+            pygame.display.set_caption("Seminario de Lenguajes") #Nombre de la ventana
+            #pantalla.fill((0,0,0))
             cursor1.update()
             boton1.update(pantalla,cursor1)
             boton2.update(pantalla,cursor1)
             pygame.display.update()
             reloj2.tick(20)
+            
         #pygame.quit()
     #pygame.init()
     
     #---------------JUEGO EN SI---------------
     while salirJuego!=True | salirMenuPrincipal!=False:#LOOP PRINCIPAL
         for event in pygame.event.get():
+            #Para salir del juego
             if event.type == pygame.QUIT:
                 salirJuego=True 
-            if colisiono==False:        
+            #Movimientos
+            if colisiono==False:    
+                #Manteniendo la tecla apretada    
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         leftsigueapretada=True
@@ -190,6 +221,7 @@ def main():
                     if event.key == pygame.K_DOWN:
                         downsigueapretada=True
                         vy=velocidad
+                #Si suelto la tecla
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:
                         leftsigueapretada=False
@@ -206,42 +238,48 @@ def main():
                     if event.key == pygame.K_DOWN:
                         downsigueapretada=False
                         if upsigueapretada:vy=-velocidad
-                        else:vy=0                    
-            
-        reloj1.tick(20) #Cuento el tiempo a si se mueve el tipo
-        
-        pantalla.blit(imagenfondo,(0,0))
-        
-        
-        
+                        else:vy=0         
+                    
+            #score = pygame.time.get_ticks()/1000 - score_start
+        reloj1.tick(20)
+        pygame.display.set_caption("Meteoro ") #Nombre de la ventana
+        Info = Fuente1.render("Trata de esquivar los cuadrados",0,(255,255,255))
+        pantalla.blit(fondoJuego,(0,0))
+        pantalla.blit(Info,(5,5))
         t+=1
+        tiempoReal+=1
         if t>1:
             t=0
-        
         if colision(player1,recs1):
             player1.choco=True
             colisiono=True
             vx=0
             vy=0
             sonido1.play()
+        if player1.rect.colliderect(r1ParedPiso) | player1.rect.colliderect(r1Paredizquierda) | player1.rect.colliderect(r1Paredderecha) | player1.rect.colliderect(r1ParedTecho)  :
+            player1.choco=True            
+            vx=0
+            vy=0
+            sonido1.play()
         
-       
-        recs1.mover()
-        
-        recs1.pintar(pantalla)
-       
-        player1.update(pantalla,vx,vy,t)
-        
-        
+        if contadorEmpiza == True:
             
+            score_start = pygame.time.get_ticks()/1000 
+            Segundos =  str(score_start)
+            Cronometro = Fuente1.render(Segundos,0, Amarillo)
+            pantalla.blit(Cronometro,(450,5))
+        
+        recs1.mover()
+        recs1.pintar(pantalla)
+        player1.update(pantalla,vx,vy,t)
         
         pygame.display.update()
         
         recs1.reagregar()
-        
-               
-        
-       
+        pygame.draw.rect(fondoJuego, Rojo, r1Paredizquierda)
+        pygame.draw.rect(fondoJuego, Rojo, r1Paredderecha)
+        pygame.draw.rect(fondoJuego, Rojo, r1ParedPiso)
+        pygame.draw.rect(fondoJuego, Rojo, r1ParedTecho)
     pygame.quit()
     
 main()
